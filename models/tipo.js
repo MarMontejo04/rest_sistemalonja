@@ -1,0 +1,20 @@
+import mongoose, { model } from "mongoose";
+const Schema = mongoose.Schema;
+
+mongoose.pluralize(null);
+const tipoSchema = new Schema({
+  id_tpo: {
+    type: Number,
+    required: true,
+    unique: true,
+  },
+  nombre: {
+    type: String,
+    required: true,
+    maxlength: 30,
+  },
+});
+
+const tipo = mongoose.model("tipo", tipoSchema);
+
+export { tipo };
