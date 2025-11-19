@@ -3,11 +3,6 @@ const Schema = mongoose.Schema;
 
 mongoose.pluralize(null);
 const tipoSchema = new Schema({
-  id_tpo: {
-    type: Number,
-    required: true,
-    unique: true,
-  },
   nombre: {
     type: String,
     required: true,

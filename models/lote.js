@@ -3,11 +3,6 @@ const Schema = mongoose.Schema;
 
 mongoose.pluralize(null);
 const loteSchema = new Schema({
-  id_lte: {
-    type: Number,
-    required: true,
-    unique: true,
-  },
   kilos: {
     type: Number,
     required: true,

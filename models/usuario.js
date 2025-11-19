@@ -3,16 +3,6 @@ const Schema = mongoose.Schema;
 
 mongoose.pluralize(null);
 const usuarioSchema = new Schema({
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    lowercase: true,
-  },
-  password: {
-    type: String,
-    required: true,
-  },
   nombre: {
     type: String,
     required: true,
@@ -22,6 +12,16 @@ const usuarioSchema = new Schema({
     required: true,
   },
   ap_materno: {
+    type: String,
+    required: true,
+  },
+  correo: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
+  },
+  password: {
     type: String,
     required: true,
   },

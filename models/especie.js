@@ -3,11 +3,6 @@ const Schema = mongoose.Schema;
 
 mongoose.pluralize(null);
 const especieSchema = new Schema({
-  id_epe: {
-    type: Number,
-    required: true,
-    unique: true,
-  },
   nombre: {
     type: String,
     required: true,

@@ -3,11 +3,6 @@ const Schema = mongoose.Schema;
 
 mongoose.pluralize(null);
 const compradorSchema = new Schema({
-  codigo_cpr: {
-    type: Number,
-    required: true,
-    unique: true,
-  },
   nombre: {
     type: String,
     required: true,

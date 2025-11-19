@@ -3,11 +3,6 @@ const Schema = mongoose.Schema;
 
 mongoose.pluralize(null);
 const compraSchema = new Schema({
-  id_cmp: {
-    type: Number,
-    required: true,
-    unique: true,
-  },
   codigo_cpr: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "comprador",
