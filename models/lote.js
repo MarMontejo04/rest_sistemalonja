@@ -21,6 +21,6 @@ const loteSchema = new Schema({
   },
 });
 
-const lote = moongose.model("lote", loteSchema);
+const lote = mongoose.model("lote", loteSchema);
 
 export { lote };

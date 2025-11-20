@@ -8,7 +8,7 @@ const compraSchema = new Schema({
     ref: "comprador",
     required: true,
   },
-  lote_comprado: {
+  id_lte: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "lote",
     required: true,

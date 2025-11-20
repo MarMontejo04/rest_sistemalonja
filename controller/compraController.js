@@ -43,12 +43,14 @@ const consultaId = async (req, res, next) => {
 
 const actualizar = async (req, res) => {
   const id = req.params.id;
-  const { precio_kilo_final, precio_total, fecha} = req.body;
+  const { codigo_cpr, id_lte, precio_kilo_final, precio_total, fecha} = req.body;
 
   const compras = await compra.findOneAndUpdate(
     { _id: id },
     {
       $set: {
+        codigo_cpr: codigo_cpr,
+        id_lte: id_lte,
         precio_kilo_final: precio_kilo_final,
         precio_total: precio_total,
         fecha: fecha,
@@ -57,14 +59,14 @@ const actualizar = async (req, res) => {
     { new: true }
   );
 
-  res.json({ mensaje: "Compra actualizado", usuarios });
+  res.json({ mensaje: "Compra actualizado", compras });
 };
 
 const eliminar = async (req, res) => {
   const id = req.params.id;
   const compras = await compra.findOneAndDelete({ _id: id });
 
-  if (usuarios) {
+  if (compras) {
     res.json({ mensaje: "Compra borrado" });
   }
 };
