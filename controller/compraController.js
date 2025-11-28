@@ -50,7 +50,6 @@ const actualizar = async (req, res) => {
     {
       $set: {
         codigo_cpr: codigo_cpr,
-        id_lte: id_lte,
         precio_kilo_final: precio_kilo_final,
         precio_total: precio_total,
         fecha: fecha,

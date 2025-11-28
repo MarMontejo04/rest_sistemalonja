@@ -19,6 +19,12 @@ const loteSchema = new Schema({
     type: Date,
     required: true,
   },
+  id_cmp: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'compra',
+    required: false,
+    default: null,
+  },
 });
 
 const lote = mongoose.model("lote", loteSchema);

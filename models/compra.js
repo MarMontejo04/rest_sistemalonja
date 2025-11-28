@@ -8,11 +8,6 @@ const compraSchema = new Schema({
     ref: "comprador",
     required: true,
   },
-  id_lte: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "lote",
-    required: true,
-  },
   precio_kilo_final: {
     type: Number,
     required: true,

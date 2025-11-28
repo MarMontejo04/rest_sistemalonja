@@ -43,7 +43,7 @@ const consultaId = async (req, res, next) => {
 
 const actualizar = async (req, res) => {
   const id = req.params.id;
-  const { kilos, numero_cajas, precio_kilo_salida, fecha } = req.body;
+  const { kilos, numero_cajas, precio_kilo_salida, fecha, id_cmp } = req.body;
 
   const lotes = await lote.findOneAndUpdate(
     { _id: id },
@@ -53,6 +53,7 @@ const actualizar = async (req, res) => {
         numero_cajas: numero_cajas,
         precio_kilo_salida: precio_kilo_salida,
         fecha: fecha,
+        id_cmp: id_cmp,
       },
     },
     { new: true }
