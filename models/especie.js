@@ -16,7 +16,7 @@ const especieSchema = new Schema({
   id_lte: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "lote",
-    required: true,
+    required: false,
   },
   imagen: {
     type: String,

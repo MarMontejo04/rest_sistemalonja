@@ -30,11 +30,6 @@ const crear = async (req, res, next) => {
 
     await nuevaCompra.save();
 
-    res.json({
-      mensaje: "Se creo la compra",
-      nuevaCompra,
-    });
-
     const loteAsignado = await lote.findByIdAndUpdate(
       id_lte,
       { $set: { id_cmp: nuevaCompra._id } },
@@ -42,9 +37,7 @@ const crear = async (req, res, next) => {
     );
 
     if (!loteAsignado) {
-      return res
-        .status(404)
-        .json({ mensaje: "Lote no encontrado, compra no procesada." });
+      return res.json({ mensaje: "Lote no encontrado, compra no procesada." });
     }
 
     res.json({
@@ -119,16 +112,42 @@ const actualizar = async (req, res) => {
       { new: true }
     );
 
-    const loteActualizado = await lote.findByIdAndUpdate(
-      id_lte,
-      { $set: { id_cmp: compraActualizada._id } },
-      { new: true }
-    );
+    const loteAnterior = await lote.findOne({ id_cmp: id });
+
+    if (loteAnterior && loteAnterior._id.toString() !== id_lte) {
+      await lote.findByIdAndUpdate(
+        loteAnterior._id,
+        { $set: { id_cmp: null } },
+      );
+    }
+
+    if (id_lte && (!loteAnterior || loteAnterior._id.toString() !== id_lte)) {
+      const loteNuevoVerificar = await lote.findById(id_lte).select("id_cmp");
+
+      if (!loteNuevoVerificar) {
+        return res.status(404).json({ mensaje: "Nuevo Lote no encontrado." });
+      }
+
+      if (loteNuevoVerificar.id_cmp !== null) {
+        return res.json({
+          mensaje:
+            "El nuevo lote seleccionado ya está comprado por otra transacción.",
+        });
+      }
+
+      var loteAsignado = await lote.findByIdAndUpdate(
+        id_lte,
+        { $set: { id_cmp: id } },
+        { new: true }
+      );
+    } else if (loteAnterior && loteAnterior._id.toString() === id_lte) {
+      var loteAsignado = loteAnterior;
+    }
 
     res.json({
       mensaje: "Compra actualizada",
       compraActualizada,
-      loteActualizado,
+      loteAsignado,
     });
   } catch (error) {
     console.error(error);

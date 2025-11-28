@@ -1,17 +1,50 @@
 import { lote } from "../models/lote.js";
+import { compra } from "../models/compra.js";
+import { especie } from "../models/especie.js";
 
 const crear = async (req, res, next) => {
-  const datos = req.body;
-  console.log(datos);
-  const lotes = new lote(datos);
+  const { kilos, numero_cajas, precio_kilo_salida, fecha, id_epe } = req.body;
   try {
-    await lotes.save();
+    const especieVerificar = await especie.findById(id_epe).select("id_lte");
+
+    if (!especieVerificar) {
+      return res.json({
+        mensaje: "El ID de la Especie proporcionado no existe.",
+      });
+    }
+
+    const nuevoLote = new lote({
+      kilos,
+      numero_cajas,
+      precio_kilo_salida,
+      fecha,
+      id_cmp: null,
+    });
+
+    await nuevoLote.save();
+
     res.json({
       mensaje: "Se creo el lote",
+      nuevoLote,
     });
+
+    const especieVinculada = await especie.findByIdAndUpdate(
+      id_epe_asociada,
+      { $set: { id_lte: nuevoLote._id} },
+      { new: true }
+    );
+
+    if (!especieVinculada) {
+      return res.json({
+        mensaje: "Especie seleccionada no encontrada o no válida.",
+      });
+    }
   } catch (error) {
-    console.log(error);
-    next();
+    console.error(error);
+    res
+      .status(500)
+      .json({ mensaje: "Error al crear el lote", error: error.message });
+    next(error);
   }
 };
 
