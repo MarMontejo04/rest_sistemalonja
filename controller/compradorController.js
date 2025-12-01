@@ -33,7 +33,7 @@ const crear = async (req, res) => {
 // GET /api/comprador
 const consulta = async (req, res) => {
   try {
-    const compradores = await comprador.find({});
+    const compradores = await comprador.find({activo: true});
     res.json(compradores);
   } catch (error) {
     console.log(error);
@@ -43,9 +43,9 @@ const consulta = async (req, res) => {
 
 
 // GET /api/comprador/:id
-const consultaId = async (req, res) => {
+const consultaCorreo = async (req, res) => {
   try {
-    const compradores = await comprador.findById(req.params.id);
+    const compradores = await comprador.find({correo: req.params.correo, active: true});
 
     if (!compradores) {
       return res.status(404).json({ mensaje: "El comprador no existe" });
@@ -64,7 +64,7 @@ const consultaId = async (req, res) => {
 const actualizar = async (req, res) => {
   try {
     const compradores = await comprador.findByIdAndUpdate(
-      req.params.id,
+      {_id: req.params.id, activo: true},
       req.body,
       { new: true}
     );
@@ -91,20 +91,25 @@ const actualizar = async (req, res) => {
 
 // DELETE /api/comprador/:id
 const eliminar = async (req, res) => {
+  const id = req.params.id;
   try {
-    const compradores = await comprador.findByIdAndDelete(req.params.id);
+    const compradores = await comprador.findOneAndUpdate(
+      { _id: id, activo: true },
+      { $set: { activo: false } },
+      { new: true }
+    );
 
     if (!compradores) {
-      return res.status(404).json({ mensaje: "El comprador no existe" });
+      return res.status(404).json({ mensaje: "El comprador no existe o ya estaba inactivo." });
     }
 
-    res.json({ mensaje: "Comprador borrado" });
+    res.json({ mensaje: "Comprador desactivado (Soft Delete) correctamente" });
 
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ mensaje: "Error al eliminar comprador" });
+    console.error("Error al desactivar comprador:", error);
+    res.status(500).json({ mensaje: "Error al desactivar comprador" });
   }
 };
 
 
-export { crear, actualizar, eliminar, consulta, consultaId };
+export { crear, actualizar, eliminar, consulta, consultaCorreo };

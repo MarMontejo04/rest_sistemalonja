@@ -32,6 +32,10 @@ const usuarioSchema = new Schema({
     default: "vendedor",
     required: true,
   },
+  activo: {
+    type: Boolean,
+    default: true
+  }
 });
 
 usuarioSchema.pre("save", async function (next) {

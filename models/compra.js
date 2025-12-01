@@ -20,6 +20,10 @@ const compraSchema = new Schema({
     type: Date,
     default: Date.now,
   },
+  activo: {
+    type: Boolean,
+    default: true
+  }
 });
 
 const compra = mongoose.model("compra", compraSchema);

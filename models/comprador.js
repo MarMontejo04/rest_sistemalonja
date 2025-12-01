@@ -32,6 +32,10 @@ const compradorSchema = new Schema({
     maxlength: 80,
     trim: true,
   },
+  activo: {
+    type: Boolean,
+    default: true
+  }
 });
 
 const comprador = mongoose.model("comprador", compradorSchema);

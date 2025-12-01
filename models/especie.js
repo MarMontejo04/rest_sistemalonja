@@ -20,6 +20,10 @@ const especieSchema = new Schema({
     type: String,
     maxlength: 100,
   },
+  activo: {
+    type: Boolean,
+    default: true
+  }
 });
 
 const especie = mongoose.model("especie", especieSchema);

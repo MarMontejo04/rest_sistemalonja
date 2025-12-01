@@ -5,11 +5,16 @@ import { lote } from "../models/lote.js"; //Necesario para actualizar FK id_cmp 
 // POST /api/compra/registrar
 
 const crear = async (req, res, next) => {
-  const { codigo_cpr, id_lte, precio_kilo_final, precio_total } =
-    req.body;
+  const { codigo_cpr, id_lte, precio_kilo_final, precio_total } = req.body;
 
   try {
-    const loteVerificar = await lote.findById(id_lte).select("id_cmp");
+    const loteVerificar = await lote.findById(id_lte).select("id_cmp activo");
+
+    if (!loteVerificar || loteVerificar.activo === false) {
+      return res
+        .status(404)
+        .json({ mensaje: "Lote no encontrado o inactivo." });
+    }
 
     if (!loteVerificar) {
       return res.status(404).json({ mensaje: "Lote no encontrado." });
@@ -20,29 +25,14 @@ const crear = async (req, res, next) => {
         mensaje: "El lote ya fue comprado y no está disponible.",
       });
     }
+    const nuevaCompra = new compra({
+      codigo_cpr,
+      precio_kilo_final,
+      precio_total,
+      fecha: new Date(),
+    });
 
-        // const kilos = loteVerificar.kilos;
-        // const cajas = loteVerificar.numero_cajas;
-
-        // const costoPescado = kilos * precio_kilo_final;
-
-        // // Costo de cajas (usando la función de ayuda, si es necesario recalcular o aplicar un cargo fijo)
-        // // **Nota:** Usaremos la lógica de tu frontend: solo necesitas el cargo total de cajas.
-        
-        // const PRECIO_CAJA = 30; // Usar una constante del lado del servidor o traerla de la BD/config.
-        // const costoEnvases = cajas * PRECIO_CAJA; 
-        
-        // const precio_total_calculado = costoPescado + costoEnvases;
-        // // ---------------------------------
-        
-        const nuevaCompra = new compra({
-            codigo_cpr,
-            precio_kilo_final,
-            precio_total,
-            fecha: new Date(), 
-        });
-
-        await nuevaCompra.save({ }); 
+    await nuevaCompra.save({});
 
     const loteAsignado = await lote.findByIdAndUpdate(
       id_lte,
@@ -72,18 +62,22 @@ const crear = async (req, res, next) => {
 
 const consulta = async (req, res, next) => {
   try {
-    const compras = await compra.find({}).populate({
+    const compras = await compra.find({ activo: true }).populate({
       path: "codigo_cpr",
       select: "nombre apellido_paterno",
     });
     res.json(compras);
   } catch (error) {
-    console.log(error);
+    console.error(error);
+    res
+      .status(500)
+      .json({
+        mensaje: "Error al consultar las compras",
+        error: error.message,
+      });
     next();
   }
 };
-
-
 
 // Actualiza una Compra existente (Actualiza el lote en caso de que se cambie)
 // PUT /api/compra/actualizar/:id
@@ -95,7 +89,7 @@ const actualizar = async (req, res) => {
 
   try {
     const compraActualizada = await compra.findOneAndUpdate(
-      { _id: id },
+      { _id: id, activo: true },
       {
         $set: {
           codigo_cpr,
@@ -110,10 +104,9 @@ const actualizar = async (req, res) => {
     const loteAnterior = await lote.findOne({ id_cmp: id });
 
     if (loteAnterior && loteAnterior._id.toString() !== id_lte) {
-      await lote.findByIdAndUpdate(
-        loteAnterior._id,
-        { $set: { id_cmp: null } },
-      );
+      await lote.findByIdAndUpdate(loteAnterior._id, {
+        $set: { id_cmp: null },
+      });
     }
 
     if (id_lte && (!loteAnterior || loteAnterior._id.toString() !== id_lte)) {
@@ -152,22 +145,29 @@ const actualizar = async (req, res) => {
   }
 };
 
-// Elimina la Compra y libera el lote asociado
+// Oculta (Soft Delete) la Compra y libera el lote asociado
 // DELETE /api/compra/eliminar/:id
 
 const eliminar = async (req, res) => {
   const id = req.params.id;
-  const compraEliminada = await compra.findOneAndDelete({ _id: id });
   try {
-    if (!compraEliminada) {
-      return res.status(404).json({ mensaje: "Compra no encontrada" });
+    const compraOculta = await compra.findOneAndUpdate(
+      { _id: id, activo: true },
+      { $set: { activo: false } },
+      { new: true }
+    );
+
+    if (!compraOculta) {
+      return res
+        .status(404)
+        .json({ mensaje: "Compra no encontrada o ya está inactiva." });
     }
 
     await lote.findOneAndUpdate({ id_cmp: id }, { $set: { id_cmp: null } });
 
-    res.json({ mensaje: "Compra eliminada y Lote liberado" });
+    res.json({ mensaje: "Compra desactivada (Soft Delete) y Lote liberado" });
   } catch (error) {
-    console.error(error);
+    console.error("Error al eliminar compra (Transacción abortada):", error);
     res
       .status(500)
       .json({ mensaje: "Error al eliminar la compra", error: error.message });

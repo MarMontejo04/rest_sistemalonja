@@ -25,6 +25,10 @@ const loteSchema = new Schema({
     required: false,
     default: null,
   },
+  activo: {
+    type: Boolean,
+    default: true
+  }
 });
 
 const lote = mongoose.model("lote", loteSchema);

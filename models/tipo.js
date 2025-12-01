@@ -8,6 +8,10 @@ const tipoSchema = new Schema({
     required: true,
     maxlength: 30,
   },
+  activo: {
+    type: Boolean,
+    default: true
+  }
 });
 
 
