@@ -1,12 +1,12 @@
 import { usuario } from "../models/usuario.js";
 
 
-// authController.js (Fragmento de la función login)
+// GET authController.js (Fragmento de la función login)
 
 const autenticarUsuario = async (req, res, next) => {
     const { correo, password } = req.body;
     
-    const user = await usuario.findOne({ email });
+    const user = await usuario.findOne({ correo });
 
     if (!user) {
         return res.status(401).json({ mensaje: 'Usuario o Contraseña incorrectos' });
@@ -88,4 +88,4 @@ const eliminar = async (req, res) => {
   }
 };
 
-export { crear, actualizar, eliminar, consulta, consultaId };
+export { crear, actualizar, eliminar, consulta, consultaId, autenticarUsuario };
