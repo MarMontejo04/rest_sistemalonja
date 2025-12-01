@@ -11,12 +11,10 @@ const especieSchema = new Schema({
   id_tpo: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "tipo",
-    required: true,
   },
   id_lte: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "lote",
-    required: false,
   },
   imagen: {
     type: String,

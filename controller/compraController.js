@@ -5,7 +5,7 @@ import { lote } from "../models/lote.js"; //Necesario para actualizar FK id_cmp 
 // POST /api/compra/registrar
 
 const crear = async (req, res, next) => {
-  const { codigo_cpr, id_lte, precio_kilo_final, precio_total, fecha } =
+  const { codigo_cpr, id_lte, precio_kilo_final, precio_total } =
     req.body;
 
   try {
@@ -21,14 +21,28 @@ const crear = async (req, res, next) => {
       });
     }
 
-    const nuevaCompra = new compra({
-      codigo_cpr,
-      precio_kilo_final,
-      precio_total,
-      fecha,
-    });
+        // const kilos = loteVerificar.kilos;
+        // const cajas = loteVerificar.numero_cajas;
 
-    await nuevaCompra.save();
+        // const costoPescado = kilos * precio_kilo_final;
+
+        // // Costo de cajas (usando la función de ayuda, si es necesario recalcular o aplicar un cargo fijo)
+        // // **Nota:** Usaremos la lógica de tu frontend: solo necesitas el cargo total de cajas.
+        
+        // const PRECIO_CAJA = 30; // Usar una constante del lado del servidor o traerla de la BD/config.
+        // const costoEnvases = cajas * PRECIO_CAJA; 
+        
+        // const precio_total_calculado = costoPescado + costoEnvases;
+        // // ---------------------------------
+        
+        const nuevaCompra = new compra({
+            codigo_cpr,
+            precio_kilo_final,
+            precio_total,
+            fecha: new Date(), 
+        });
+
+        await nuevaCompra.save({ }); 
 
     const loteAsignado = await lote.findByIdAndUpdate(
       id_lte,
@@ -69,26 +83,7 @@ const consulta = async (req, res, next) => {
   }
 };
 
-// Consulta una Compra por ID
-// GET /api/compra/consulta/:id
 
-const consultaId = async (req, res, next) => {
-  try {
-    const compraID = await compra.findById(req.params.id).populate({
-      path: "codigo_cpr",
-      select: "nombre apellido_paterno correo",
-    });
-    if (!compraID) {
-      return res.status(404).json({
-        mensaje: "La compra no existe",
-      });
-    }
-    res.json(compraID);
-  } catch (error) {
-    res.status(500).send(error.message);
-    next(error);
-  }
-};
 
 // Actualiza una Compra existente (Actualiza el lote en caso de que se cambie)
 // PUT /api/compra/actualizar/:id
@@ -179,4 +174,4 @@ const eliminar = async (req, res) => {
   }
 };
 
-export { crear, actualizar, eliminar, consulta, consultaId };
+export { crear, actualizar, eliminar, consulta };

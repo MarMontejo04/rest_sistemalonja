@@ -10,6 +10,7 @@ const tipoSchema = new Schema({
   },
 });
 
+
 const tipo = mongoose.model("tipo", tipoSchema);
 
 export { tipo };

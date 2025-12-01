@@ -1,5 +1,6 @@
 import { tipo } from "../models/tipo.js";
 
+// POST /api/tipo/registrar
 const crear = async (req, res, next) => {
   const datos = req.body;
   console.log(datos);
@@ -15,9 +16,10 @@ const crear = async (req, res, next) => {
   }
 };
 
+// GET /api/tipo/consulta
 const consulta = async (req, res, next) => {
   try {
-    const tipos = await tipo.find({});
+    const tipos = await tipo.find({}).select("nombre");
     res.json(tipos);
   } catch (error) {
     console.log(error);
@@ -25,22 +27,8 @@ const consulta = async (req, res, next) => {
   }
 };
 
-const consultaId = async (req, res, next) => {
-  try {
-    const tipos = await tipo.findById(req.params.id);
-    if (!tipos) {
-      res.json({
-        mensaje: "El tipo no existe",
-      });
-      next;
-    }
-    res.json(tipos);
-  } catch (error) {
-    res.send(error);
-    next();
-  }
-};
 
+// PUT /api/tipo/actualizar
 const actualizar = async (req, res) => {
   const id = req.params.id;
   const { nombre} = req.body;
@@ -58,6 +46,8 @@ const actualizar = async (req, res) => {
   res.json({ mensaje: "Tipo actualizado", tipos });
 };
 
+// DELETE /api/tipo/eliminar
+
 const eliminar = async (req, res) => {
   const id = req.params.id;
   const tipos = await tipo.findOneAndDelete({ _id: id });
@@ -67,4 +57,4 @@ const eliminar = async (req, res) => {
   }
 };
 
-export { crear, actualizar, eliminar, consulta, consultaId };
+export { crear, actualizar, eliminar, consulta };

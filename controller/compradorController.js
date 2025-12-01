@@ -1,75 +1,110 @@
 import { comprador } from "../models/comprador.js";
 
-const crear = async (req, res, next) => {
+// POST /api/comprador/registrar
+const crear = async (req, res) => {
   const datos = req.body;
-  console.log(datos);
   const compradores = new comprador(datos);
+
   try {
     await compradores.save();
+
     res.json({
-      mensaje: "Se creo el comprador",
+      mensaje: "Se creó el comprador",
+      data: compradores,
     });
+
   } catch (error) {
-    console.log(error);
-    next();
+
+    if (error.code === 11000) {
+      return res.status(400).json({
+        mensaje: "El correo ya está registrado."
+      });
+    }
+
+    console.log("Error al crear comprador:", error);
+    return res.status(500).json({
+      mensaje: "Error al crear el comprador",
+      error: error.message,
+    });
   }
 };
 
-const consulta = async (req, res, next) => {
+
+// GET /api/comprador
+const consulta = async (req, res) => {
   try {
     const compradores = await comprador.find({});
     res.json(compradores);
   } catch (error) {
     console.log(error);
-    next();
+    res.status(500).json({ mensaje: "Error al consultar compradores" });
   }
 };
 
-const consultaId = async (req, res, next) => {
+
+// GET /api/comprador/:id
+const consultaId = async (req, res) => {
   try {
     const compradores = await comprador.findById(req.params.id);
+
     if (!compradores) {
-      res.json({
-        mensaje: "El comprador no existe",
-      });
-      next;
+      return res.status(404).json({ mensaje: "El comprador no existe" });
     }
+
     res.json(compradores);
+
   } catch (error) {
-    res.send(error);
-    next();
+    console.log(error);
+    res.status(500).json({ mensaje: "Error al buscar comprador" });
   }
 };
 
+
+// PUT /api/comprador/:id
 const actualizar = async (req, res) => {
-  const id = req.params.id;
-  const { nombre, apellido_paterno, apellido_materno, direccion, correo } =
-    req.body;
+  try {
+    const compradores = await comprador.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true}
+    );
 
-  const compradores = await comprador.findOneAndUpdate(
-    { _id: id },
-    {
-      $set: {
-        nombre: nombre,
-        apellido_paterno: apellido_paterno,
-        apellido_materno: apellido_materno,
-        direccion: direccion,
-        correo: correo,
-      },
-    },
-    { new: true }
-  );
+    if (!compradores) {
+      return res.status(404).json({ mensaje: "El comprador no existe" });
+    }
 
-  res.json({ mensaje: "Comprador actualizado", compradores });
-};
+    res.json({ mensaje: "Comprador actualizado", compradores });
 
-const eliminar = async (req, res) => {
-  const id = req.params.id;
-  const compradores = await comprador.findOneAndDelete({ _id: id });
+  } catch (error) {
 
-  if (compradores) {
-    res.json({ mensaje: "Comprador borrado" });
+    if (error.code === 11000) {
+      return res.status(400).json({
+        mensaje: "El correo ya está registrado."
+      });
+    }
+
+    console.log("Error al actualizar comprador:", error);
+    res.status(500).json({ mensaje: "Error al actualizar comprador" });
   }
 };
+
+
+// DELETE /api/comprador/:id
+const eliminar = async (req, res) => {
+  try {
+    const compradores = await comprador.findByIdAndDelete(req.params.id);
+
+    if (!compradores) {
+      return res.status(404).json({ mensaje: "El comprador no existe" });
+    }
+
+    res.json({ mensaje: "Comprador borrado" });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ mensaje: "Error al eliminar comprador" });
+  }
+};
+
 
 export { crear, actualizar, eliminar, consulta, consultaId };

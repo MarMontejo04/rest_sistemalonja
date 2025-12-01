@@ -1,76 +1,61 @@
 import { lote } from "../models/lote.js";
-import { compra } from "../models/compra.js";
-import { especie } from "../models/especie.js";
 
-const crear = async (req, res, next) => {
-  const { kilos, numero_cajas, precio_kilo_salida, fecha, id_epe } = req.body;
+//Crear lote se encuentra en loteEspecie Controller, debido a la logica 1:N con especie
+
+const consulta = async (req, res) => {
   try {
-    const especieVerificar = await especie.findById(id_epe).select("id_lte");
+    const lotes = await lote.aggregate([
+      {
+        $lookup: {
+          from: "especie",
+          localField: "_id",
+          foreignField: "id_lte",
+          as: "especie"
+        }
+      },
+      { $unwind: "$especie" },
 
-    if (!especieVerificar) {
-      return res.json({
-        mensaje: "El ID de la Especie proporcionado no existe.",
-      });
-    }
+      {
+        $project: {
+          _id: 1,
+          kilos: "$kilos",
+          cajas: "$numero_cajas",
+          precio_kilo_salida: 1,
+          especie: "$especie.nombre",
+          imagen: "$especie.imagen",
 
-    const nuevoLote = new lote({
-      kilos,
-      numero_cajas,
-      precio_kilo_salida,
-      fecha,
-      id_cmp: null,
-    });
+          estado: {
+            $cond: {
+              if: { $eq: ["$id_cmp", null] },
+              then: "Disponible",
+              else: "Agotado"
+            }
+          }
+        }
+      }
+    ]);
 
-    await nuevoLote.save();
+    res.json(lotes);
 
-    res.json({
-      mensaje: "Se creo el lote",
-      nuevoLote,
-    });
-
-    const especieVinculada = await especie.findByIdAndUpdate(
-      id_epe_asociada,
-      { $set: { id_lte: nuevoLote._id} },
-      { new: true }
-    );
-
-    if (!especieVinculada) {
-      return res.json({
-        mensaje: "Especie seleccionada no encontrada o no válida.",
-      });
-    }
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .json({ mensaje: "Error al crear el lote", error: error.message });
-    next(error);
+    res.status(500).json({
+      mensaje: "Error al consultar lotes",
+      error: error.message
+    });
   }
 };
 
-const consulta = async (req, res, next) => {
-  try {
-    const lotes = await lote.find({});
-    res.json(lotes);
-  } catch (error) {
-    console.log(error);
-    next();
-  }
-};
 
 const consultaId = async (req, res, next) => {
   try {
     const lotes = await lote.findById(req.params.id);
     if (!lotes) {
-      res.json({
-        mensaje: "El lote no existe",
-      });
-      next;
+      return res.json({ mensaje: "El lote no existe" });
     }
     res.json(lotes);
   } catch (error) {
-    res.send(error);
-    next();
+    next(error);
   }
 };
 
@@ -81,13 +66,7 @@ const actualizar = async (req, res) => {
   const lotes = await lote.findOneAndUpdate(
     { _id: id },
     {
-      $set: {
-        kilos: kilos,
-        numero_cajas: numero_cajas,
-        precio_kilo_salida: precio_kilo_salida,
-        fecha: fecha,
-        id_cmp: id_cmp,
-      },
+      $set: { kilos, numero_cajas, precio_kilo_salida, fecha, id_cmp },
     },
     { new: true }
   );
@@ -104,4 +83,4 @@ const eliminar = async (req, res) => {
   }
 };
 
-export { crear, actualizar, eliminar, consulta, consultaId };
+export { actualizar, eliminar, consulta };

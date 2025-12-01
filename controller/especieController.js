@@ -1,20 +1,5 @@
 import { especie } from "../models/especie.js";
 
-const crear = async (req, res, next) => {
-  const datos = req.body;
-  console.log(datos);
-  const especies = new especie(datos);
-  try {
-    await especies.save();
-    res.json({
-      mensaje: "Se creo la especie",
-    });
-  } catch (error) {
-    console.log(error);
-    next();
-  }
-};
-
 const consulta = async (req, res, next) => {
   try {
     const especies = await especie.find({});
@@ -70,4 +55,4 @@ const eliminar = async (req, res) => {
   }
 };
 
-export { crear, actualizar, eliminar, consulta, consultaId };
+export { actualizar, eliminar, consulta, consultaId };

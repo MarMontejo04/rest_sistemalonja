@@ -1,5 +1,23 @@
 import { usuario } from "../models/usuario.js";
 
+
+// authController.js (Fragmento de la función login)
+
+const autenticarUsuario = async (req, res, next) => {
+    const { correo, password } = req.body;
+    
+    const user = await usuario.findOne({ email });
+
+    if (!user) {
+        return res.status(401).json({ mensaje: 'Usuario o Contraseña incorrectos' });
+    }
+
+    if (!user.comparePassword(password)) {
+        return res.status(401).json({ mensaje: 'Usuario o Contraseña incorrectos' });
+    }
+
+};
+
 const crear = async (req, res, next) => {
   const datos = req.body;
   console.log(datos);
