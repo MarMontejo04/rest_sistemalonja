@@ -19,7 +19,7 @@ const crear = async (req, res, next) => {
 // GET /api/tipo/consulta
 const consulta = async (req, res, next) => {
   try {
-    const tipos = await tipo.find({}).select("nombre");
+    const tipos = await tipo.find({ activo: true }).select("nombre");
     res.json(tipos);
   } catch (error) {
     console.log(error);
@@ -27,14 +27,13 @@ const consulta = async (req, res, next) => {
   }
 };
 
-
 // PUT /api/tipo/actualizar
 const actualizar = async (req, res) => {
   const id = req.params.id;
-  const { nombre} = req.body;
+  const { nombre } = req.body;
 
   const tipos = await tipo.findOneAndUpdate(
-    { _id: id },
+    { _id: id, activo: true },
     {
       $set: {
         nombre: nombre,
@@ -50,10 +49,25 @@ const actualizar = async (req, res) => {
 
 const eliminar = async (req, res) => {
   const id = req.params.id;
-  const tipos = await tipo.findOneAndDelete({ _id: id });
+  try {
+    const tipoOculto = await tipo.findOneAndUpdate(
+      { _id: id, activo: true },
+      { $set: { activo: false } },
+      { new: true }
+    );
 
-  if (tipos) {
-    res.json({ mensaje: "Tipo borrado" });
+    if (!tipoOculto) {
+      return res
+        .status(404)
+        .json({ mensaje: "Tipo no encontrado o ya estaba inactivo." });
+    }
+
+    res.json({ mensaje: "Tipo desactivado (Soft Delete) correctamente" });
+  } catch (error) {
+    console.error("Error al desactivar tipo:", error);
+    res
+      .status(500)
+      .json({ mensaje: "Error al desactivar tipo", error: error.message });
   }
 };
 
