@@ -1,8 +1,7 @@
 import { usuario } from "../models/usuario.js";
-
+import jwt from 'jsonwebtoken';
 
 // GET authController.js (Fragmento de la función login)
-
 const autenticarUsuario = async (req, res, next) => {
     const { correo, password } = req.body;
     
@@ -15,6 +14,25 @@ const autenticarUsuario = async (req, res, next) => {
     if (!user.comparePassword(password)) {
         return res.status(401).json({ mensaje: 'Usuario o Contraseña incorrectos' });
     }
+
+    const token = jwt.sign(
+        { 
+            id: user._id, 
+            nombre: user.nombre, 
+            rol: user.rol 
+        }, 
+        process.env.JWT_SECRET, 
+        { expiresIn: '8h' }
+    );
+
+    res.json({
+        token,
+        usuario: {
+            _id: user._id,
+            nombre: user.nombre,
+            rol: user.rol
+        }
+    });
 
 };
 
