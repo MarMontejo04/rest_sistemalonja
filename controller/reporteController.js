@@ -11,17 +11,15 @@ const generarReporteDiario = async (req, res, next) => {
 
   const fechaInicioUTC = new Date(`${fecha}T00:00:00.000Z`);
 
-  const fechaFinUTC = new Date(fechaInicioUTC);
-  fechaFinUTC.setDate(fechaFinUTC.getDate() + 1)
-
+  const fechaFinUTC = new Date(fechaInicioUTC.getTime() + 24 * 60 * 60 * 1000);
   try {
     const reporte = await compra.aggregate([
       {
         $match: {
           activo: true,
           fecha: {
-            $gte: fechaInicioUTC, 
-            $lt: fechaFinUTC, 
+            $gte: fechaInicioUTC,
+            $lt: fechaFinUTC,
           },
         },
       },
@@ -57,7 +55,7 @@ const generarReporteDiario = async (req, res, next) => {
 
       {
         $lookup: {
-          from: "tipos",
+          from: "tipo",
           localField: "especieDetalle.id_tpo",
           foreignField: "_id",
           as: "tipoDetalle",
