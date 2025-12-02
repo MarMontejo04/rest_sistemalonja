@@ -16,7 +16,7 @@ import reporte_router from "./routes/reporte_router.js"
 
 mongoose.Promise = global.Promise;
 
-mongoose.connect('mongodb+srv://marianamontejo25_db_user:GWNoAi1BsOWCNNKS@cluster0.5cw7qx2.mongodb.net/sistema_lonja?appName=Cluster0')
+mongoose.connect(process.env.MONGO_URI)
     .then(() => {
         console.log("Conexión exitosa a la base de datos.");
     })
