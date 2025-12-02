@@ -45,11 +45,14 @@ const consulta = async (req, res) => {
 // GET /api/comprador/:id
 const consultaCorreo = async (req, res) => {
   try {
-    const compradores = await comprador.find({correo: req.params.correo, activo: true});
+    const compradores = await comprador.find({
+  correo: req.params.correo,
+  activo: true
+});
 
-    if (!compradores) {
-      return res.status(404).json({ mensaje: "El comprador no existe" });
-    }
+if (!compradores || compradores.length === 0) {
+  return res.json([]);  
+}
 
     res.json(compradores);
 
