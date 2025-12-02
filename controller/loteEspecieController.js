@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { lote } from "../models/lote.js";
 import { especie } from "../models/especie.js";
 import { tipo } from "../models/tipo.js";
@@ -119,6 +120,77 @@ const consultaTipo = async (req, res, next) => {
   }
 };
 
+const consultaId = async (req, res, next) => {
+    const idLote = req.params.id;
+
+    if (!mongoose.Types.ObjectId.isValid(idLote)) {
+        return res.status(400).json({ mensaje: "Formato de ID de Lote inválido." });
+    }
+    const loteObjectId = new mongoose.Types.ObjectId(idLote);
+
+    try {
+        const resultadoLote = await lote.aggregate([
+            {
+                $match: {
+                    _id: loteObjectId,
+                    activo: true, // Filtro de Soft Delete
+                },
+            },
+
+            {
+                $lookup: {
+                    from: 'especie', // Colección singular
+                    localField: '_id', // PK del Lote
+                    foreignField: 'id_lte', // FK en Especie
+                    as: 'especieDetalle',
+                },
+            },
+            { $unwind: '$especieDetalle' }, 
+
+            {
+                $lookup: {
+                    from: 'tipo', // Colección singular
+                    localField: 'especieDetalle.id_tpo',
+                    foreignField: '_id',
+                    as: 'tipoDetalle',
+                },
+            },
+            { $unwind: '$tipoDetalle' },
+
+            {
+                $project: {
+                    _id: '$_id', // ID del Lote
+                    kilos: '$kilos',
+                    numero_cajas: '$numero_cajas',
+                    precio_kilo_salida: '$precio_kilo_salida',
+                    fecha: '$fecha',
+                    activo: '$activo',
+                    id_cmp: '$id_cmp',
+                    
+                    nombre: '$especieDetalle.nombre', // nombre_especie
+                    imagen: '$especieDetalle.imagen', // imagen_especie
+                    
+                    tipo: '$tipoDetalle.nombre', // tipo_especie
+                    
+                    id_tpo_real: '$tipoDetalle._id', // ID real del Tipo para la actualización
+                }
+            },
+            
+            { $limit: 1 }
+        ]);
+
+        if (resultadoLote.length === 0) {
+            return res.status(404).json({ mensaje: "Lote no encontrado o inactivo." });
+        }
+        res.json(resultadoLote[0]); 
+
+    } catch (error) {
+        console.error("Error en consultaId del Lote:", error);
+        res.status(500).json({ mensaje: "Error al consultar el Lote.", error: error.message });
+        next(error);
+    }
+};
+
 const actualizar = async (req, res, next) => {
   const idLote = req.params.id;
   const { kilos, numero_cajas, precio_kilo_salida } = req.body;
@@ -225,4 +297,4 @@ const eliminar = async (req, res, next) => {
     }
 };
 
-export { crear, consultaTipo, actualizar, eliminar };
+export { crear, consultaTipo, actualizar, eliminar, consultaId };
