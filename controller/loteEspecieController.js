@@ -10,9 +10,9 @@ const crear = async (req, res, next) => {
 
   try {
     const nuevoLote = new lote({
-      kilos,
-      numero_cajas,
-      precio_kilo_salida,
+      kilos: kilos,
+      numero_cajas: numero_cajas,
+      precio_kilo_salida: precio_kilo_salida,
       fecha: new Date(),
       id_cmp: null,
       activo: true,

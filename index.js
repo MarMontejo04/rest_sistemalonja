@@ -11,6 +11,7 @@ import comprador_router from "./routes/comprador_router.js"
 import especie_router from "./routes/especie_router.js"
 import lote_router from "./routes/lote_router.js"
 import loteespecie_router from "./routes/loteespecie_router.js"
+import reporte_router from "./routes/reporte_router.js"
 
 
 mongoose.Promise = global.Promise;
@@ -36,6 +37,7 @@ app.use("/api/especie", especie_router);
 app.use("/api/lote", lote_router);
 app.use("/api/tipo", tipo_router);
 app.use("/api/lote-especie", loteespecie_router)
+app.use("/api/reporte", reporte_router)
 
 //definiendo el puerto
 const port = 3001;
