@@ -6,12 +6,17 @@ const consulta = async (req, res) => {
   try {
     const lotes = await lote.aggregate([
       {
+        $match: {
+          activo: true, // Filtro de Soft Delete
+        },
+      },
+      {
         $lookup: {
           from: "especie",
           localField: "_id",
           foreignField: "id_lte",
-          as: "especie"
-        }
+          as: "especie",
+        },
       },
       { $unwind: "$especie" },
 
@@ -28,24 +33,22 @@ const consulta = async (req, res) => {
             $cond: {
               if: { $eq: ["$id_cmp", null] },
               then: "Disponible",
-              else: "Agotado"
-            }
-          }
-        }
-      }
+              else: "Agotado",
+            },
+          },
+        },
+      },
     ]);
 
     res.json(lotes);
-
   } catch (error) {
     console.error(error);
     res.status(500).json({
       mensaje: "Error al consultar lotes",
-      error: error.message
+      error: error.message,
     });
   }
 };
-
 
 const consultaId = async (req, res, next) => {
   try {
