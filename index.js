@@ -16,7 +16,13 @@ import reporte_router from "./routes/reporte_router.js"
 
 mongoose.Promise = global.Promise;
 
-mongoose.connect(process.env.MONGO_URI);
+mongoose.connect(process.env.MONGO_URI)
+    .then(() => {
+        console.log("Conexión exitosa a la base de datos.");
+    })
+    .catch((error) => {
+        console.error("Error al conectar a la base de datos:", error);
+    });
 
 const app = express();
 
