@@ -1,4 +1,6 @@
 import jwt from 'jsonwebtoken';
+import dotenv from "dotenv";
+
 import { usuario } from '../models/usuario.js';
 
 const isAuthenticated = async (req, res, next) => {
@@ -10,11 +12,9 @@ const isAuthenticated = async (req, res, next) => {
 
     try {
         const tokenLimpio = token.replace('Bearer ', '');
-        
         const cifrado = jwt.verify(tokenLimpio, process.env.JWT_SECRET); 
-        
         const user = await usuario.findById(cifrado.id).select('rol');
-        
+
         if (!user) {
             return res.status(404).json({ mensaje: 'Token inválido: Usuario no encontrado.' });
         }
